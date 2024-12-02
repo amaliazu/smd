@@ -37,13 +37,23 @@ class SMD_Subdomain_Handler {
     private function get_user_by_subdomain($subdomain) {
         global $wpdb;
         
-        // Langsung cari berdasarkan custom username
+        // Cari berdasarkan custom username terlebih dahulu
         $user_id = $wpdb->get_var($wpdb->prepare(
             "SELECT user_id FROM {$wpdb->usermeta} 
             WHERE meta_key = 'custom_username' 
             AND meta_value = %s",
             $subdomain
         ));
+
+        // Jika tidak ditemukan, cari berdasarkan user_login
+        if (!$user_id) {
+            $user = $wpdb->get_row($wpdb->prepare(
+                "SELECT ID FROM {$wpdb->users} 
+                WHERE user_login = %s",
+                $subdomain
+            ));
+            $user_id = $user ? $user->ID : false;
+        }
 
         return $user_id ? get_user_by('id', $user_id) : false;
     }
