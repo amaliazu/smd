@@ -73,34 +73,47 @@ class SMD_Subdomain_Handler {
 
     public function name_shortcode() {
         $subdomain = $this->get_current_subdomain();
-        if (empty($subdomain)) return '';
+        
+        // Debugging
+        error_log('Current Subdomain: ' . $subdomain);
+        
+        if (empty($subdomain)) {
+            error_log('No subdomain detected');
+            return 'No subdomain detected';
+        }
         
         $user = $this->get_user_by_subdomain($subdomain);
-        if (!$user) return '';
-
-        // Cek berbagai kemungkinan field nama
-        $name = '';
         
-        // Cek display name
-        if (!empty($user->display_name) && $user->display_name !== $user->user_login) {
-            $name = $user->display_name;
-        }
-        // Cek first name & last name
-        elseif (!empty(get_user_meta($user->ID, 'first_name', true))) {
-            $first_name = get_user_meta($user->ID, 'first_name', true);
-            $last_name = get_user_meta($user->ID, 'last_name', true);
-            $name = trim($first_name . ' ' . $last_name);
-        }
-        // Cek nickname
-        elseif (!empty(get_user_meta($user->ID, 'nickname', true))) {
-            $name = get_user_meta($user->ID, 'nickname', true);
-        }
-        // Fallback ke user_login jika semua kosong
-        else {
-            $name = $user->user_login;
+        if (!$user) {
+            error_log('No user found for subdomain: ' . $subdomain);
+            return 'User not found';
         }
 
-        return esc_html($name);
+        // Debug user data
+        error_log('User ID: ' . $user->ID);
+        error_log('User Login: ' . $user->user_login);
+        error_log('Display Name: ' . $user->display_name);
+        
+        // Ambil nama dari custom field jika ada
+        $custom_name = get_user_meta($user->ID, 'full_name', true);
+        if (!empty($custom_name)) {
+            return esc_html($custom_name);
+        }
+        
+        // Jika tidak ada custom name, gunakan display name
+        if (!empty($user->display_name) && $user->display_name !== $user->user_login) {
+            return esc_html($user->display_name);
+        }
+        
+        // Coba gabungkan first name dan last name
+        $first_name = get_user_meta($user->ID, 'first_name', true);
+        $last_name = get_user_meta($user->ID, 'last_name', true);
+        if (!empty($first_name) || !empty($last_name)) {
+            return esc_html(trim($first_name . ' ' . $last_name));
+        }
+        
+        // Fallback ke user login jika tidak ada nama lain
+        return esc_html($user->user_login);
     }
 
     public function phone_shortcode($atts = []) {
