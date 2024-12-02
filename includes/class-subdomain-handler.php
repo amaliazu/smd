@@ -76,7 +76,31 @@ class SMD_Subdomain_Handler {
         if (empty($subdomain)) return '';
         
         $user = $this->get_user_by_subdomain($subdomain);
-        return $user ? esc_html($user->display_name) : '';
+        if (!$user) return '';
+
+        // Cek berbagai kemungkinan field nama
+        $name = '';
+        
+        // Cek display name
+        if (!empty($user->display_name) && $user->display_name !== $user->user_login) {
+            $name = $user->display_name;
+        }
+        // Cek first name & last name
+        elseif (!empty(get_user_meta($user->ID, 'first_name', true))) {
+            $first_name = get_user_meta($user->ID, 'first_name', true);
+            $last_name = get_user_meta($user->ID, 'last_name', true);
+            $name = trim($first_name . ' ' . $last_name);
+        }
+        // Cek nickname
+        elseif (!empty(get_user_meta($user->ID, 'nickname', true))) {
+            $name = get_user_meta($user->ID, 'nickname', true);
+        }
+        // Fallback ke user_login jika semua kosong
+        else {
+            $name = $user->user_login;
+        }
+
+        return esc_html($name);
     }
 
     public function phone_shortcode($atts = []) {
