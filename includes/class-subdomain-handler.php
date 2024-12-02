@@ -5,6 +5,7 @@ class SMD_Subdomain_Handler {
         add_shortcode('member_phone', [$this, 'phone_shortcode']);
         add_shortcode('member_city', [$this, 'city_shortcode']);
         add_shortcode('member_address', [$this, 'address_shortcode']);
+        add_shortcode('member_wa', [$this, 'whatsapp_shortcode']);
 
         // Add filters for Elementor and general content
         add_filter('elementor/frontend/the_content', [$this, 'process_custom_tags']);
@@ -22,14 +23,14 @@ class SMD_Subdomain_Handler {
 
     public function get_current_subdomain() {
         $host = strtolower($_SERVER['HTTP_HOST']);
+        $parts = explode('.', $host);
         
-        if (strpos($host, 'kpglocal.test') !== false) {
-            $parts = explode('.', $host);
-            if (count($parts) > 2) {
-                return $parts[0];
-            }
+        // Jika memiliki subdomain (parts lebih dari 2)
+        if (count($parts) > 2) {
+            return $parts[0];
         }
         
+        // Fallback ke parameter GET jika tidak ada subdomain
         return isset($_GET['member']) ? sanitize_text_field($_GET['member']) : '';
     }
 
