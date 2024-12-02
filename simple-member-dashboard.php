@@ -2,8 +2,8 @@
 /*
 Plugin Name: Simple Member Dashboard
 Description: Custom membership system with frontend management
-Version: 1.0
-Author: Ardi 123
+Version: 2.0
+Author: Ardi 1234
 */
 
 // Prevent direct access
